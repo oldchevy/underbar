@@ -230,7 +230,7 @@
 
     // TIP: There's a very clever way to re-use every() here.
     //Could not figure out how to do this.
-    
+
   };
 
 
@@ -253,11 +253,34 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+
+    _.each(arguments, function(entryobj,index){
+      if(index===0);  //So superfluous overwriting doesn't happen on the first arg
+      else{
+        for(var key in entryobj){
+          obj[key] = entryobj[key];
+        }
+      }
+    });
+
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+
+    _.each(arguments, function(entryobj,index){
+      if(index===0);  //So superfluous overwriting doesn't happen on the first arg
+      else{
+        for(var key in entryobj){
+          if(obj[key] === undefined)
+            obj[key] = entryobj[key];
+        }
+      }
+    });
+
+    return obj;
   };
 
 

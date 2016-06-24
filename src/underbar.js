@@ -324,6 +324,25 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+
+    var calledArgs = [];
+    var savedResults = [];
+    var result;
+
+    return function(){
+
+      var stringedArgs = JSON.stringify(arguments)
+    
+      if(!(_.contains(calledArgs, stringedArgs))){
+        result = func.apply(this, arguments);
+        calledArgs.push(stringedArgs);
+        savedResults.push(result);
+        return result;
+      }
+      else{
+        return savedResults[_.indexOf(calledArgs,stringedArgs)];
+      }
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -333,6 +352,23 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    
+    /*var args = {};
+    _.each(arguments, function(entry, index){
+        if(index === 0 || index === 1);
+        else{
+          args.push(entry);
+        }
+    });*/
+    //How do I get any args that are passed other than func and wait? The above doesn't work
+
+    var arg1 = arguments[2], arg2 = arguments[3];
+
+    return setTimeout(function(args){
+      return func(arg1,arg2);   
+      //func must be wrapped, otherwise the call to func will be attempted when set timeout is interpreting it's args
+    }, wait);
+
   };
 
 

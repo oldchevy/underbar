@@ -364,7 +364,7 @@
 
     var arg1 = arguments[2], arg2 = arguments[3];
 
-    return setTimeout(function(args){
+    return setTimeout(function(){
       return func(arg1,arg2);   
       //func must be wrapped, otherwise the call to func will be attempted when set timeout is interpreting it's args
     }, wait);
@@ -383,6 +383,16 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+
+    var copyArr = array.slice(0);
+    var newArr = [];
+
+    while(copyArr.length > 0){
+      var random = Math.floor(Math.random()*copyArr.length);
+      newArr = newArr.concat(copyArr.splice(random, 1));
+    }
+
+    return newArr;
   };
 
 

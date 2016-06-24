@@ -353,22 +353,19 @@
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
     
-    /*var args = {};
-    _.each(arguments, function(entry, index){
-        if(index === 0 || index === 1);
-        else{
-          args.push(entry);
-        }
-    });*/
-    //How do I get any args that are passed other than func and wait? The above doesn't work
 
-    var arg1 = arguments[2], arg2 = arguments[3];
+    var newArgs = [];
+    for (var i=0; i<arguments.length; i++){
+      if( i !== 0 && i !== 1){
+        newArgs.push(arguments[i]);
+      }
+    }
+    //Grabbing all args that need to be passed to func
 
     return setTimeout(function(){
-      return func(arg1,arg2);   
+      return func.apply(this, newArgs);   
       //func must be wrapped, otherwise the call to func will be attempted when set timeout is interpreting it's args
     }, wait);
-
   };
 
 

@@ -7,6 +7,7 @@
   // seem very useful, but remember it--if a function needs to provide an
   // iterator when the user does not pass one in, this will be handy.
   _.identity = function(val) {
+    return val;
   };
 
   /**
@@ -37,6 +38,9 @@
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
+    var len = array.length;
+    var begin = len-n < 0 ? 0 : len-n;
+    return n === undefined ? array[len-1] : array.slice(begin,len);
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -45,6 +49,18 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
+    if (collection instanceof Array){
+      for (var i=0; i<collection.length; i++){
+        var value = collection[i];
+        iterator(value, i , collection);
+      }
+    }
+    else{
+      for (var key in collection){
+        var value = collection[key];
+        iterator(value, key, collection);
+      }
+    }
   };
 
   // Returns the index at which value can be found in the array, or -1 if value
@@ -66,12 +82,25 @@
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
+     var result = [];
+     _.each(collection, function(entry){
+      if(test(entry)){
+        result.push(entry);
+      }
+     });
+     return result;
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
+    var filtered = _.filter(collection, test);
+    var rejected = _.filter(collection, function(entry){
+      return _.indexOf(filtered, entry) === -1;
+    });
+
+    return rejected;
   };
 
   // Produce a duplicate-free version of the array.

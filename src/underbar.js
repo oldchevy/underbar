@@ -423,23 +423,23 @@
     
     var outsideArgs = arguments;
     var zipped = [];
-    var length = 0;
 
-    for(var i=0; i<arguments.length; i++){
-      if(arguments[i].length > length){
-        length = arguments[i].length;
-      }
-    }
+    var largest = function(){};
+
+    var length = _.reduce(arguments, function(biggest, current){
+      if (current.length > biggest.length) return current;
+      else return biggest;
+    }).length;
 
     for(var j=0; j<length; j++){
       zipped.push([]);
     }
 
 
-    _.each(zipped, function(value,index) {
-      for(var k=0; k<outsideArgs.length; k++){
-        value.push(outsideArgs[k][index]);
-      }
+    _.each(zipped, function(value,i) {
+      _.each(outsideArgs, function(singleArg){
+        value.push(singleArg[i]);
+      });
     });
 
     return zipped;
@@ -451,6 +451,8 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+
+
 
   };
 

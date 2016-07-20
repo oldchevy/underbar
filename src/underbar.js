@@ -421,24 +421,25 @@
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
     
-    var outsideArgs = arguments;
     var zipped = [];
+    var outsideArgs = arguments;
+    //Assigning to another var so that passing to nested _.each works as expected
 
-    var largest = function(){};
 
-    var length = _.reduce(arguments, function(biggest, current){
+    var largest = function(biggest, current){
       if (current.length > biggest.length) return current;
       else return biggest;
-    }).length;
+    };
 
-    for(var j=0; j<length; j++){
+    var largestArr = _.reduce(arguments, largest);
+    //Find the longest arg, so we can iterate through all indeces that will be in the output array
+
+    _.each(largestArr, function(entry,i) {
       zipped.push([]);
-    }
-
-
-    _.each(zipped, function(value,i) {
+      //Initialize new inner array
       _.each(outsideArgs, function(singleArg){
-        value.push(singleArg[i]);
+        zipped[i].push(singleArg[i]);
+        //Adds arg entry of the working index
       });
     });
 

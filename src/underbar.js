@@ -404,6 +404,29 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    
+    //First check whether a method string or a function is provided
+    if(typeof functionOrKey === 'function'){
+      //Loop through each entry in the collection
+      _.each(collection, function(entry, index, collection){
+        //Applies the function to the entry (this in the func becomes entry)
+        var processed = functionOrKey.apply(entry,args);
+        //Reassign
+        collection[index] = processed;
+      });
+      return collection;
+    }
+    else if(typeof functionOrKey === 'string'){
+      _.each(collection, function(entry, index, collection){
+        //Using bracket property lookup, then evalate with any args given
+        var processed = entry[functionOrKey](args);
+        collection[index] = processed;
+      });
+      return collection;
+    }
+
+    //Ensures that return is undefined if functionOrKey is not string or func
+    else;
 
   };
 
@@ -453,18 +476,78 @@
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
 
+      var result = [];
+      //Initially tried to pass along result through the recursive call stack,
+      //which worked fine in a sandbox but not in the SpecRunner... weird
 
+      _.each(nestedArray, function(entry, index){
+          if(entry instanceof Array)
+            result = result.concat(_.flatten(entry));
+            //Call flatten recursively if the entry turns out to be an array
+            //Then concat it to the results and reassign
+
+          else 
+            result.push(entry);
+            //If it's not an array just push it into results
+      });
+
+      return result;
 
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    
+    var outerArgs = arguments,
+        intersect = [],
+        firstArr = arguments[0];
+
+    _.each(firstArr, function(entry){
+      var bool = true;
+      _.each(outerArgs, function(array){
+
+        if(bool && _.indexOf(array, entry) === -1)
+          bool = false;
+
+      });
+
+      if (bool) intersect.push(entry);
+
+    });
+
+    return intersect;
+
   };
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+
+    var diff = [];  
+    var newArgs = [];
+    _.each(arguments, function(entry, i){
+      if( +i !== 0 ) newArgs.push(entry);
+    });
+
+    console.log(array, newArgs);
+
+    _.each(array, function(entry){
+
+      var bool = true;
+
+      _.each(newArgs, function(checkArr){
+
+        if(bool && _.indexOf(checkArr, entry) !== -1)
+          bool = false;
+
+      });
+
+      if (bool) diff.push(entry);
+
+    });
+
+    return diff;
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once

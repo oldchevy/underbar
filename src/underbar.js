@@ -417,6 +417,7 @@
       });
       return collection;
     }
+
     else if(typeof functionOrKey === 'string'){
       _.each(collection, function(entry, index, collection){
         //Using bracket property lookup, then evalate with any args given
@@ -440,39 +441,48 @@
   // If iterator is a string, sort objects by that property with the name
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
-  _.sortBy = function(collection, iterator) {
+  _.sortBy = function(collection, iterator, iteratorArgs) {
 
-    //Re-use invoke logic here, but apply is not needed
-    //We make a copy of the original collection to transform
-    var copied = _.extend([],collection);
+    //Re-use invoke logic here, but apply is not needed because we
+    //are not calling a method or series of methods on each entry, just
+    //pasing it to a transforming function.
 
-    _.each(copied, function(entry, index, collec){
+    function sorter(entry){
       if(typeof iterator === 'function'){
-        var processed = iterator(entry);
-        collec[index] = processed;
+        return iterator(entry);
       }
       else if (typeof iterator === 'string'){
         if(typeof entry[iterator] === 'function')
-          var processed = entry[iterator](args);
+          return entry[iterator](iteratorArgs);
         else
-          var processed = entry[iterator];
-        collec[index] = processed;
+          return entry[iterator];
       }
       else;
-    });
+    }
 
     var bool = true;
 
+    //For logic, we swap entried when one is larger than the other, and the array
+    //passed through over and over until no swaps are made
     while(bool){
       bool = false;
       _.each(collection, function(entry, i, collect){
-        if((copied[i] !== undefined && copied[i] > copied[i+1])||
-            copied[i] === undefined && copied[i+1] !== undefined){
-          var temp1 = copied[i], temp2 = collect[i];
-          copied[i] = copied[i+1];
+        
+        var current = sorter(entry);
+
+        //Don't comput next if we're at the end of the array
+        //It will error out otherwise
+        if(i<collect.length-1){
+          var next = sorter(collect[i+1]);
+        }
+
+        //Logic must be able to handle values of undefined, making them
+        //float to the end
+        if((current !== undefined && current > next)||
+            current === undefined && next !== undefined){
+          var temp = collect[i];
           collect[i] = collect[i+1];
-          copied[i+1] = temp1;
-          collect[i+1] = temp2;
+          collect[i+1] = temp;
           bool = true;
         }
       });
@@ -499,7 +509,7 @@
     };
 
     var largestArr = _.reduce(arguments, largest);
-    //Find the longest arg, so we can iterate through all indeces that will be in the output array
+    //Find the longest arg, so we can iterate through all indices that will be in the output array
 
     _.each(largestArr, function(entry,i) {
       zipped.push([]);
@@ -547,15 +557,24 @@
         intersect = [],
         firstArr = arguments[0];
 
+    //Loop through each entry in the first array
     _.each(firstArr, function(entry){
+
+      //Initial bool is true
       var bool = true;
+
+      //For each entry in the first array, check each entry in the other args
+      //Using _.contains to check instead of indexOf
       _.each(outerArgs, function(array){
 
-        if(bool && _.indexOf(array, entry) === -1)
+        //Logic is set up such that the first time it is found that the entry
+        //is not shared in an arg, bool = false and no more args are checked
+        if(bool && !(_.contains(array, entry)))
           bool = false;
 
       });
 
+      //If bool never gets set to false it pushes to results
       if (bool) intersect.push(entry);
 
     });
@@ -568,13 +587,12 @@
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
 
+    //Same logic here as intersection, although we cannot re-use code
     var diff = [];  
     var newArgs = [];
     _.each(arguments, function(entry, i){
       if( +i !== 0 ) newArgs.push(entry);
     });
-
-    console.log(array, newArgs);
 
     _.each(array, function(entry){
 
@@ -582,7 +600,7 @@
 
       _.each(newArgs, function(checkArr){
 
-        if(bool && _.indexOf(checkArr, entry) !== -1)
+        if(bool && _.contains(checkArr, entry))
           bool = false;
 
       });
@@ -601,38 +619,46 @@
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
 
+    //Storing these two variables in a closure, so they can be accessed on multiple
+    //function calls
     var called = false;
-    var timedOut = true;
+    //var timedOut = true;
     var result;
 
 
     return function(){
 
       if(!called){
+        //First case: timer expired. Call immediately then set timer
 
         called = true;
-        timedOut = false;
+        //timedOut = false;
         result = func.apply(this, arguments);
         setTimeout(function(){
           called = false;
-          timedOut = true;
+          //timedOut = true;
         }, wait);
-        
-        return result;
-
-      } else if (called && timedOut){
-        timedOut = false;
-        setTimeout(function(){
-          called = false;
-          timedOut = true;
-          return func.apply(this, arguments);
-        }, wait);
-        return result;
-
-      } else {
 
         return result;
+      } 
+      //Instructions say to create a thrid option where the next call is scheduled,
+      //but the test suite suggests this is not the case.
 
+      // else if (called && timedOut){
+      //   //Second case: 
+      //   timedOut = false;
+      //   setTimeout(function(){
+      //     called = false;
+      //     timedOut = true;
+      //     return func.apply(this, arguments);
+      //   }, wait);
+      //   return result;
+      // } 
+
+      //When the function has already been called, it cannot be called again
+      //until the timeout changes the boolean back to false
+      else {
+        return result;
       }
 
     };

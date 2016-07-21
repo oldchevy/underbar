@@ -409,8 +409,9 @@
     if(typeof functionOrKey === 'function'){
       //Loop through each entry in the collection
       _.each(collection, function(entry, index, collection){
-        //Applies the function to the entry (this in the func becomes entry)
-        var processed = functionOrKey.apply(entry,args);
+        //Applies the function to the entry ('this' in the applied function becomes entry)
+          var processed = functionOrKey.apply(entry,args)
+
         //Reassign
         collection[index] = processed;
       });
@@ -419,7 +420,12 @@
     else if(typeof functionOrKey === 'string'){
       _.each(collection, function(entry, index, collection){
         //Using bracket property lookup, then evalate with any args given
-        var processed = entry[functionOrKey](args);
+        //Must check if the given property is indeed a method, and just
+        //access it as a property if not
+        if(typeof entry[functionOrKey] === 'function')
+          var processed = entry[functionOrKey](args);
+        else
+          var processed = entry[functionOrKey];
         collection[index] = processed;
       });
       return collection;
@@ -435,6 +441,54 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+
+    //Re-use invoke logic here, but apply is not needed
+    //We make a copy of the original collection to transform
+    var copied = _.extend([],collection);
+
+    _.each(copied, function(entry, index, collec){
+      if(typeof iterator === 'function'){
+        var processed = iterator(entry);
+        collec[index] = processed;
+      }
+      else if (typeof iterator === 'string'){
+        if(typeof entry[iterator] === 'function')
+          var processed = entry[iterator](args);
+        else
+          var processed = entry[iterator];
+        collec[index] = processed;
+      }
+      else;
+    });
+
+    var transformed = copied;
+    //var transformed = _.invoke(copied, iterator);
+
+    var bool = true;
+
+    while(bool){
+      bool = false;
+      _.each(collection, function(entry, i, collect){
+        if(transformed[i] !== undefined && transformed[i] > transformed[i+1]){
+          var temp1 = transformed[i], temp2 = collect[i];
+          transformed[i] = transformed[i+1];
+          collect[i] = collect[i+1];
+          transformed[i+1] = temp1;
+          collect[i+1] = temp2;
+          bool = true;
+        }
+        if(transformed[i] === undefined && transformed[i+1] !== undefined){
+          var temp1 = transformed[i], temp2 = collect[i];
+          transformed[i] = transformed[i+1];
+          collect[i] = collect[i+1];
+          transformed[i+1] = temp1;
+          collect[i+1] = temp2;
+          bool = true;
+        }
+      });
+    }
+
+    return collection;
   };
 
   // Zip together two or more arrays with elements of the same index

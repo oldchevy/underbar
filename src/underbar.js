@@ -461,27 +461,17 @@
       else;
     });
 
-    var transformed = copied;
-    //var transformed = _.invoke(copied, iterator);
-
     var bool = true;
 
     while(bool){
       bool = false;
       _.each(collection, function(entry, i, collect){
-        if(transformed[i] !== undefined && transformed[i] > transformed[i+1]){
-          var temp1 = transformed[i], temp2 = collect[i];
-          transformed[i] = transformed[i+1];
+        if((copied[i] !== undefined && copied[i] > copied[i+1])||
+            copied[i] === undefined && copied[i+1] !== undefined){
+          var temp1 = copied[i], temp2 = collect[i];
+          copied[i] = copied[i+1];
           collect[i] = collect[i+1];
-          transformed[i+1] = temp1;
-          collect[i+1] = temp2;
-          bool = true;
-        }
-        if(transformed[i] === undefined && transformed[i+1] !== undefined){
-          var temp1 = transformed[i], temp2 = collect[i];
-          transformed[i] = transformed[i+1];
-          collect[i] = collect[i+1];
-          transformed[i+1] = temp1;
+          copied[i+1] = temp1;
           collect[i+1] = temp2;
           bool = true;
         }
@@ -610,5 +600,41 @@
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+
+    var called = false;
+    var timedOut = true;
+    var result;
+
+
+    return function(){
+
+      if(!called){
+
+        called = true;
+        timedOut = false;
+        result = func.apply(this, arguments);
+        setTimeout(function(){
+          called = false;
+          timedOut = true;
+        }, wait);
+        
+        return result;
+
+      } else if (called && timedOut){
+        timedOut = false;
+        setTimeout(function(){
+          called = false;
+          timedOut = true;
+          return func.apply(this, arguments);
+        }, wait);
+        return result;
+
+      } else {
+
+        return result;
+
+      }
+
+    };
   };
 }());

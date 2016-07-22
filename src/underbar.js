@@ -307,7 +307,16 @@
       if (!alreadyCalled) {
         // TIP: .apply(this, arguments) is the standard way to pass on all of the
         // infromation from one function call to another.
-        result = func.apply(this, arguments);
+
+        //After learning about 'this', the keyword refers to when the enclosing
+        //function is called at runtime. This is in the test suite assertion, after
+        //assigning a function var 'add' to the closure. In this case 'this' is not bound to
+        //any specific object. The reason why .apply is useful is because of the way it
+        //passes along the arguments object. If we just called func(arguments), the func
+        //would get all the args, but only as a single array arg [x,y,z]. Of course we could
+        //manually grab all the args and call them normally, but there is really
+        //no other good way to pass along an arbitrary number of args.
+        result = func.apply(this,arguments);
         alreadyCalled = true;
       }
       // The new function always returns the originally computed result.
@@ -410,7 +419,14 @@
       //Loop through each entry in the collection
       _.each(collection, function(entry, index, collection){
         //Applies the function to the entry ('this' in the applied function becomes entry)
+        //Invoke is only to be used when the function passed makes use of the this keyword
+        //to perform a method or chain of methods.
+
+        //ex: function(){
+        //      return this.split('').reverse().join('');
+        //    }
           var processed = functionOrKey.apply(entry,args)
+        
 
         //Reassign
         collection[index] = processed;

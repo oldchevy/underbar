@@ -101,6 +101,11 @@
     });
 
     return rejected;
+
+    //A more elegant solution:
+    // return _.filter(collection, function(entry){
+    //   return !test(entry);
+    // });
   };
 
   // Produce a duplicate-free version of the array.
@@ -112,6 +117,18 @@
       }
     });
     return uniques;
+
+    //That way is n^2 in time complexity. Here's a 2n way to do it, taking
+    //advantage of the way object properties are assigned
+
+    // var intermediate = {};
+    // _.each(array, function(entry){
+    //   intermediate[entry] = entry;
+    // });
+    // _.each(intermediate, function(entry){
+    //   uniques.push(entry);
+    // });
+
   };
 
 
@@ -202,6 +219,8 @@
   _.every = function(collection, iterator) {
 
     var iterator = iterator === undefined ? _.identity : iterator;
+    //There's a quicker way to write this:
+    // iterator = iterator || _.identity;
     //Defaults to identity function when iterator is not supplied. This is not useful, but will save an error from happening.
 
     return _.reduce(collection, function(wasFound, item) {
@@ -210,6 +229,12 @@
       }
       return Boolean(iterator(item));  //We must cast each iterator call into a boolean
     }, true);
+    //There is also a more succinct way to represent this logic too:
+    //The !! outside of reduce forces truth-y values to true, without casting each one
+
+    // return !!_.reduce(collection, function(wasFound, item) {
+    //   return wasFound && iterator(item);
+    // }, true);
 
     //Flipped logic on if statement, now if one call to iterator produces false, the chain breaks
     
@@ -227,6 +252,8 @@
       }
       return Boolean(iterator(item));  //We must cast each iterator call into a boolean
     }, false);
+
+    //Once again can write more succinctly as return wasFound || iterator(item)
 
     // TIP: There's a very clever way to re-use every() here.
     //Could not figure out how to do this.
@@ -276,6 +303,9 @@
         for(var key in entryobj){
           if(obj[key] === undefined)
             obj[key] = entryobj[key];
+
+          //A more succinct way to write this if statement:
+          //obj[key] = undefined && (obj[key] = entryobj[key])
         }
       }
     });
@@ -352,6 +382,12 @@
         return savedResults[_.indexOf(calledArgs,stringedArgs)];
       }
     };
+
+    //We can write is more succincntly with a called Args object, such that:
+
+    //if(!calledArgs[stringedArgs])
+    //   calledArgs[stringedArgs] = func.apply(this, arguments);
+    //return calledArgs[stringedArgs];
   };
 
   // Delays a function for the given number of milliseconds, and then calls
